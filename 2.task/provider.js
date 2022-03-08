@@ -10,23 +10,13 @@ class Provider {
     let lang = "en";
     const url = `http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&appid=${key}&units=${units}&lang=${lang}`;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open(
-      "GET",
-      `http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&appid=${key}&units=${units}&lang=${lang}`
-    );
-    xhr.send();
-    xhr.onreadystatechange = processRequest;
-    xhr.addEventListener("readystatechange", processRequest, false);
-
-    function processRequest(e) {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        var response = JSON.parse(xhr.responseText);
+    Http.fetchData(url)
+      .then((response) => {
         const city = response.timezone.match(/\/(.*)/)[1];
         const weather = response.current.weather[0].description;
-        console.log(`The weather for ${city} is ${weather}`);
-      }
-    }
+        console.log(`2.2) The weather for ${city} is ${weather}.`);
+      })
+      .catch((error) => alert(error));
   }
 
   /**
@@ -40,28 +30,16 @@ class Provider {
    * Given latitude and longtitude, this function returns a city
    * */
   static findCity(lat, lng) {
-    var xhr = new XMLHttpRequest();
-    xhr.open(
-      "GET",
-      "https://us1.locationiq.com/v1/reverse.php?key=pk.b3587512faa7d98cc8297d58aa1922eb&lat=" +
-        lat +
-        "&lon=" +
-        lng +
-        "&format=json",
-      true
-    );
-    xhr.send();
-    xhr.onreadystatechange = processRequest;
-    xhr.addEventListener("readystatechange", processRequest, false);
+    const url = `https://us1.locationiq.com/v1/reverse.php?key=pk.b3587512faa7d98cc8297d58aa1922eb&lat=${lat}&lon=${lng}&format=json`;
 
-    function processRequest(e) {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        var response = JSON.parse(xhr.responseText);
+    Http.fetchData(url)
+      .then((response) => {
         var city = response.address.city;
-        console.log(city);
-        return city;
-      }
-    }
+        console.log(
+          `2.1) The city located at latitude: ${lat} and longtitude: ${lng} is ${city}.`
+        );
+      })
+      .catch((error) => alert(error));
   }
 }
 
@@ -70,7 +48,7 @@ class Provider {
  * Find and print in console the city located
  * at latitude/longtitude 51.5074 and 0.1278 accordingly
  *  */
-// Provider.findCity("51.5074", "0.1278");
+Provider.findCity("51.5074", "0.1278");
 
 /**
  * Print in console the weather for the city
