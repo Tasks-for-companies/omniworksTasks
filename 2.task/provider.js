@@ -1,14 +1,14 @@
 import Http from "./http.js";
 
+const weather_key = "b419c08c07877cca671be0e4419509a7";
 class Provider {
   /**
    * Gets the weather for a given city
    * */
   static getWeather(lat, lng) {
-    const key = "b419c08c07877cca671be0e4419509a7";
     let units = "metric";
     let lang = "en";
-    const url = `http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&appid=${key}&units=${units}&lang=${lang}`;
+    const url = `http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&appid=${weather_key}&units=${units}&lang=${lang}`;
 
     Http.fetchData(url)
       .then((response) => {
@@ -23,7 +23,31 @@ class Provider {
    * Gets the currency for a given city
    * */
   static getLocalCurrency(city) {
-    return Promise.resolve(`The currency of ${city} is GBP`);
+    const weather_url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weather_key}`;
+    const currency_url = `https://api.apilayer.com/geo/country/capital/${city}`;
+
+    const myHeaders = new Headers();
+    myHeaders.append("apikey", "aqTmBtMFRvfs17uBgoWnqQscgPRCIO20");
+
+    const requestOptions = {
+      method: "GET",
+      redirect: "follow",
+      headers: myHeaders,
+    };
+
+    Promise.all([
+      fetch(weather_url).then((res1) => res1.json()),
+      fetch(currency_url, requestOptions).then((res2) => res2.json()),
+    ])
+      .then(([result1, result2]) => {
+        const weather = result1.weather[0].description;
+        const code = result2[0].currencies[0].code;
+        const currency = result2[0].currencies[0].name;
+        console.log(
+          `2.3) The weather for ${city} is ${weather}, and its currency is ${code} i.e. ${currency}.`
+        );
+      })
+      .catch((error) => console.log("error", error));
   }
 
   /**
@@ -55,3 +79,9 @@ Provider.findCity("51.5074", "0.1278");
  * located at lat/long = 51.5074 and 0.1278
  *  */
 Provider.getWeather("51.5074", "0.1278");
+
+/**
+ * Print in console in one line
+ * the weather and currency for a given city (London).
+ *  */
+Provider.getLocalCurrency("London");
